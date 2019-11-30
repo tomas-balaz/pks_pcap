@@ -4,6 +4,7 @@ import numpy as np
 
 import protocols
 import vypis_vsetkych_ramcov as vsetky_ramce
+import comm_finder
 
 
 def file_path(filename):
@@ -20,7 +21,7 @@ def get_packets_from_pcap_file(pcap_file):
 
 # nacitanie suboru, ktory chceme analyzovat
 # file_name = input("File name without directory and extension: ")
-file_name = 'eth-2'
+file_name = 'eth-4'
 
 # ziskanie paketov z suboru pomocou kniznice
 packets = get_packets_from_pcap_file(file_name)
@@ -32,4 +33,11 @@ p_name_by_val, p_val_by_name = protocols.get_protocol_dicts()
 ether_obj = vsetky_ramce.vypis_ramcov_hex(packets, p_name_by_val, p_val_by_name)
 arp_obj, ipv4_obj = vsetky_ramce.parse_by_l3(ether_obj, p_name_by_val, p_val_by_name)
 tcp_obj, udp_obj, icmp_obj = vsetky_ramce.parse_ipv4_by_l4(ipv4_obj, p_name_by_val, p_val_by_name)
+
+http_obj, https_obj, telnet_obj, ssh_obj, ftp_c_obj, ftp_d_obj = \
+    vsetky_ramce.parse_tcp_by_app(tcp_obj, p_name_by_val, p_val_by_name)
+
+# http_complete, http_incomplete = comm_finder.find_comms(http_obj, p_name_by_val, p_val_by_name)
+ftp_c_complete, ftp_c_incomplete = comm_finder.find_comms(ftp_c_obj, p_name_by_val, p_val_by_name)
+
 print()

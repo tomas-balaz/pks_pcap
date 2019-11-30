@@ -86,6 +86,44 @@ def get_l4_protocol_from_ip_packet(packet, p_name_by_val):
     return l4_protocol_name
 
 
+def get_ports_from_segment(packet):
+    source_port_bytes = packet.packet[68:72]
+    destination_port_bytes = packet.packet[72:76]
+
+    source_port = int(source_port_bytes.decode('utf-8'), 16)
+    destination_port = int(destination_port_bytes.decode('utf-8'), 16)
+    # source_port = source_port_bytes.decode('utf-8')
+    # destination_port = destination_port_bytes.decode('utf-8')
+
+    return source_port, destination_port
+
+
+def get_app_layer_name_from_ports(src_p, dst_p, p_name_by_val):
+    if p_name_by_val.get(src_p) is not None:
+        return p_name_by_val[src_p]
+    elif p_name_by_val.get(dst_p) is not None:
+        return p_name_by_val[dst_p]
+    else:
+        return None
+
+
+def categorize_by_port_number(packet, http, https, telnet, ssh, ftp_c, ftp_d, p_name_by_val):
+    name = get_app_layer_name_from_ports(packet.src_port, packet.dest_port, p_name_by_val)
+    if name == 'HTTP':
+        http.append(packet)
+    elif name == 'HTTPS':
+        https.append(packet)
+    elif name == 'TELNET':
+        telnet.append(packet)
+    elif name == 'SSH':
+        ssh.append(packet)
+    elif name == 'FTP-control':
+        ftp_c.append(packet)
+    elif name == 'FTP-data':
+        ftp_d.append(packet)
+    return http, https, telnet, ssh, ftp_c, ftp_d
+
+
 def print_packet_bytes(packet):
     for i in range(0, len(packet.packet), 1):
         print(chr(packet.packet[i]), end="")
@@ -195,4 +233,21 @@ def parse_ipv4_by_l4(ipv4_obj, p_name_by_val, p_val_by_name):
         elif packet.l4_prot == 'ICMP':
             icmps.append(packet)
     return tcps, udps, icmps
+
+
+def parse_tcp_by_app(tcp_obj, p_name_by_val, p_val_by_name):
+    http = []
+    https = []
+    telnet = []
+    ssh = []
+    ftp_c = []
+    ftp_d = []
+
+    for packet in tcp_obj:
+        if packet.dest_port is None or packet.src_port is None:
+            packet.src_port, packet.dest_port = get_ports_from_segment(packet)
+        http, https, telnet, ssh, ftp_c, ftp_d = categorize_by_port_number(packet,
+                            http, https, telnet, ssh, ftp_c, ftp_d, p_name_by_val)
+
+    return http, https, telnet, ssh, ftp_c, ftp_d
 
