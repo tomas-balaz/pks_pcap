@@ -109,6 +109,7 @@ def get_app_layer_name_from_ports(src_p, dst_p, p_name_by_val):
 
 def categorize_by_port_number(packet, http, https, telnet, ssh, ftp_c, ftp_d, p_name_by_val):
     name = get_app_layer_name_from_ports(packet.src_port, packet.dest_port, p_name_by_val)
+    packet.l5_prot = name
     if name == 'HTTP':
         http.append(packet)
     elif name == 'HTTPS':
@@ -210,8 +211,6 @@ def parse_by_l3(ether_obj, p_name_by_val, p_val_by_name):
     arps = []
     ipv4s = []
     for packet in ether_obj:
-        # if packet.l3_prot is None:
-        #     packet.l3_prot = get_l3_protocol_from_packet(packet, p_name_by_val)
         if packet.l3_prot == 'IPv4':
             ipv4s.append(packet)
         elif packet.l3_prot == 'ARP':
@@ -269,6 +268,7 @@ def tftp_filter(udp_obj, p_val_by_name):
     for datagram in udp_obj:
         if datagram.dest_port == p_val_by_name['TFTP'] or datagram.dest_port > 1023:
             if datagram.src_port == p_val_by_name['TFTP'] or datagram.src_port > 1023:
+                datagram.l5_prot = "TFTP"
                 tftps.append(datagram)
     return tftps
 
@@ -283,3 +283,84 @@ def fill_icmp_type_and_seq_n(icmp_obj, p_val_by_name):
             seq_n_bytes = p.packet[(type_index + 12):(type_index + 16)]
             p.icmp_seq_n = int(seq_n_bytes.decode('utf-8'), 16)
     return icmp_obj
+
+
+def print_packets(packets):
+    for p in packets:
+        print(f'rámec {p.number}')
+        print(f'dĺžka rámca poskytnutá pcap API - {p.length} B')
+        print(f'dĺžka rámca prenášaná po médiu - {(p.length + 4)} B')
+        print("Ethernet II")
+        print(f'Zdrojová MAC adresa:{group_by_two(p.src_mac)}')
+        print(f'Cieľová MAC adresa:{group_by_two(p.dest_mac)}')
+        print(p.l3_prot)
+        print(f'zdrojová IP adresa: {dec_ip_from_bytes(p.src_ip)}')
+        print(f'cieľová IP adresa: {dec_ip_from_bytes(p.dest_ip)}')
+        print(p.l4_prot)
+        print(p.l5_prot)
+        print(f'zdrojový port: {p.src_port}')
+        print(f'cieľový port: {p.dest_port}')
+        print_packet_bytes(p)
+        print('\n')
+
+
+def print_icmp_packets(packets, p_name_by_val):
+    for p in packets:
+        print(f'rámec {p.number}')
+        print(f'dĺžka rámca poskytnutá pcap API - {p.length} B')
+        print(f'dĺžka rámca prenášaná po médiu - {(p.length + 4)} B')
+        print("Ethernet II")
+        print(f'Zdrojová MAC adresa:{group_by_two(p.src_mac)}')
+        print(f'Cieľová MAC adresa:{group_by_two(p.dest_mac)}')
+        print(p.l3_prot)
+        print(f'zdrojová IP adresa: {dec_ip_from_bytes(p.src_ip)}')
+        print(f'cieľová IP adresa: {dec_ip_from_bytes(p.dest_ip)}')
+        print(p.l4_prot)
+        print(p_name_by_val[p.icmp_type])
+        print_packet_bytes(p)
+        print('\n')
+
+
+def print_tcp_comms(compl, incompl):
+
+    print("Kompletná komunikácia:\n")
+    if compl is None:
+        print('nenachadza sa taka v subore')
+    elif len(compl) > 20:
+        print_packets(compl[:10])
+        print('.\n.\n.\n')
+        print_packets(compl[-10:])
+    else:
+        print_packets(compl)
+
+    print("Nekompletná komunikácia:\n")
+    if incompl is None:
+        print('nenachadza sa taka v subore')
+    elif len(incompl) > 20:
+        print_packets(compl[:10])
+        print('.\n.\n.\n')
+        print_packets(compl[-10:])
+    else:
+        print_packets(incompl)
+
+
+def print_tftp_comms(comms):
+    if len(comms) == 0:
+        print('TFTP sa nenachadza v subore')
+        return
+    i = 0
+    for comm in comms:
+        i += 1
+        print(f'Komunikacia {i}:')
+        print_packets(comm)
+
+
+def print_icmp_comms(comms, p_name_by_val):
+    if len(comms) == 0:
+        print('ICMP sa nenachadza v subore')
+        return
+    i = 0
+    for comm in comms:
+        i += 1
+        print(f'Komunikacia {i}:')
+        print_icmp_packets(comm, p_name_by_val)

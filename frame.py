@@ -12,6 +12,7 @@ class Frame:
         self.packet = packet
         self.dest_port = None
         self.src_port = None
+        self.l5_prot = None
         self.icmp_type = None
         self.icmp_seq_n = None
 

@@ -81,6 +81,7 @@ def find_comms(packets):
 
 def find_tftp_comms(tftp_datagrams, p_val_by_name):
     communication = []
+    communications = []
     ips = []
     port = 0
     packet = None
@@ -110,8 +111,11 @@ def find_tftp_comms(tftp_datagrams, p_val_by_name):
                     i -= 1
         i += 1
         if i == len(tftp_datagrams):
-            return communication
-    return None
+            get_packet = 1
+            i = 0
+            communications.append(communication.copy())
+            communication.clear()
+    return communications
 
 
 def find_icmp_comms(packets, p_name_by_val, p_val_by_name):

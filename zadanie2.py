@@ -19,9 +19,24 @@ def get_packets_from_pcap_file(pcap_file):
     return cap_file.packets
 
 
+def print_menu():
+    print('\n-------------------------------')
+    print('MENU:\n')
+    print('  1    HTTP')
+    print('  2    HTTPS')
+    print('  3    TELNET')
+    print('  4    SSH')
+    print('  5    FTP control')
+    print('  6    FTP data')
+    print('  7    TFTP')
+    print('  8    ICMP')
+    print('  9    ARP')
+    print('-------------------------------\n')
+
+
 # nacitanie suboru, ktory chceme analyzovat
-# file_name = input("File name without directory and extension: ")
-file_name = 'trace_ip_nad_20_B'
+file_name = input("File name without directory and extension: ")
+# file_name = 'eth-4'
 
 # ziskanie paketov z suboru pomocou kniznice
 packets = get_packets_from_pcap_file(file_name)
@@ -49,7 +64,33 @@ ssh_complete, ssh_incomplete = comm_finder.find_comms(ssh_obj.copy())
 ftp_c_complete, ftp_c_incomplete = comm_finder.find_comms(ftp_c_obj.copy())
 ftp_d_complete, ftp_d_incomplete = comm_finder.find_comms(ftp_d_obj.copy())
 
-tftp_communication = comm_finder.find_tftp_comms(tftp_obj.copy(), p_val_by_name)
+tftp_comms = comm_finder.find_tftp_comms(tftp_obj.copy(), p_val_by_name)
 
 icmp_comms = comm_finder.find_icmp_comms(icmp_obj.copy(), p_name_by_val, p_val_by_name)
+
+while True:
+    print_menu()
+    choice = int(input("Vyberte z moznosti: "))
+    if choice == 1:
+        vsetky_ramce.print_tcp_comms(http_complete, http_incomplete)
+    elif choice == 2:
+        vsetky_ramce.print_tcp_comms(https_complete, https_incomplete)
+    elif choice == 3:
+        vsetky_ramce.print_tcp_comms(telnet_complete, telnet_incomplete)
+    elif choice == 4:
+        vsetky_ramce.print_tcp_comms(ssh_complete, ssh_incomplete)
+    elif choice == 5:
+        vsetky_ramce.print_tcp_comms(ftp_c_complete, ftp_c_incomplete)
+    elif choice == 6:
+        vsetky_ramce.print_tcp_comms(ftp_d_complete, ftp_d_incomplete)
+    elif choice == 7:
+        vsetky_ramce.print_tftp_comms(tftp_comms)
+    elif choice == 8:
+        vsetky_ramce.print_icmp_comms(icmp_comms, p_name_by_val)
+    elif choice == 9:
+        print('ARP communication not implemented')
+    else:
+        print('Bad input, try again')
+
+
 print()
