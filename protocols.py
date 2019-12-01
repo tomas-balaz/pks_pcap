@@ -15,7 +15,7 @@ def parse_configuration(lines):
     return protocol_name_by_value, protocol_value_by_name
 
 
-def create_congig_lines():
+def create_config_lines():
     dirname = os.path.dirname(__file__)
     filepath = os.path.join(dirname, f'config.txt')
     config_file = open(filepath, 'r')
@@ -29,5 +29,5 @@ def create_congig_lines():
 
 
 def get_protocol_dicts():
-    conf_lines = create_congig_lines()
+    conf_lines = create_config_lines()
     return parse_configuration(conf_lines)

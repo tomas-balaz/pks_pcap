@@ -37,6 +37,8 @@ def contains_flag(all_flags, requested_flags):
 
 
 def is_complete(communication):
+    if len(communication) < 3:
+        return False
     flag_syn = get_flag_byte_from_packet(communication[0])
     flag_fin = get_flag_byte_from_packet(communication[-2])
     flag_rst = get_flag_byte_from_packet(communication[-1])
