@@ -251,3 +251,27 @@ def parse_tcp_by_app(tcp_obj, p_name_by_val, p_val_by_name):
 
     return http, https, telnet, ssh, ftp_c, ftp_d
 
+
+def fill_udp_ports(udps):
+    datagrams = []
+    for datagram in udps:
+        source_port_bytes = datagram.packet[68:72]
+        destination_port_bytes = datagram.packet[72:76]
+
+        datagram.dest_port = int(destination_port_bytes.decode('utf-8'), 16)
+        datagram.src_port = int(source_port_bytes.decode('utf-8'), 16)
+        datagrams.append(datagram)
+    return datagrams
+
+
+def tftp_filter(udp_obj, p_val_by_name):
+    tftps = []
+    for datagram in udp_obj:
+        if datagram.dest_port == p_val_by_name['TFTP'] or datagram.dest_port > 1023:
+            if datagram.src_port == p_val_by_name['TFTP'] or datagram.src_port > 1023:
+                tftps.append(datagram)
+    return tftps
+
+
+def find_icmp_comms(tftp_obj, p_name_by_val, p_val_by_name):
+    pass

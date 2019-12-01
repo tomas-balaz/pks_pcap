@@ -12,6 +12,8 @@ class Frame:
         self.packet = packet
         self.dest_port = None
         self.src_port = None
+        self.icmp_type = None
+        self.icmp_seq_n = None
 
     def get_number(self):
         return self.number

@@ -21,3 +21,8 @@
 #UDP_ports
 0x0035 DNS
 0x0045 TFTP
+#ICMP_codes
+0x00 EchoReply
+0x03 DestinationUnreachable
+0x08 Echo
+0x0b TimeExceeded

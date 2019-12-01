@@ -21,7 +21,7 @@ def get_packets_from_pcap_file(pcap_file):
 
 # nacitanie suboru, ktory chceme analyzovat
 # file_name = input("File name without directory and extension: ")
-file_name = 'eth-4'
+file_name = 'trace-2'
 
 # ziskanie paketov z suboru pomocou kniznice
 packets = get_packets_from_pcap_file(file_name)
@@ -37,7 +37,17 @@ tcp_obj, udp_obj, icmp_obj = vsetky_ramce.parse_ipv4_by_l4(ipv4_obj, p_name_by_v
 http_obj, https_obj, telnet_obj, ssh_obj, ftp_c_obj, ftp_d_obj = \
     vsetky_ramce.parse_tcp_by_app(tcp_obj, p_name_by_val, p_val_by_name)
 
-# http_complete, http_incomplete = comm_finder.find_comms(http_obj, p_name_by_val, p_val_by_name)
-ftp_c_complete, ftp_c_incomplete = comm_finder.find_comms(ftp_c_obj, p_name_by_val, p_val_by_name)
+udp_obj = vsetky_ramce.fill_udp_ports(udp_obj)
+tftp_obj = vsetky_ramce.tftp_filter(udp_obj, p_val_by_name)
 
+http_complete, http_incomplete = comm_finder.find_comms(http_obj.copy())
+https_complete, https_incomplete = comm_finder.find_comms(https_obj.copy())
+telnet_complete, telnet_incomplete = comm_finder.find_comms(telnet_obj.copy())
+ssh_complete, ssh_incomplete = comm_finder.find_comms(ssh_obj.copy())
+ftp_c_complete, ftp_c_incomplete = comm_finder.find_comms(ftp_c_obj.copy())
+ftp_d_complete, ftp_d_incomplete = comm_finder.find_comms(ftp_d_obj.copy())
+
+tftp_communication = comm_finder.find_tftp_comms(tftp_obj.copy(), p_val_by_name)
+
+icmp_comms = comm_finder.find_icmp_comms(icmp_obj.copy(), p_name_by_val, p_val_by_name)
 print()
