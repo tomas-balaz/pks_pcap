@@ -21,7 +21,7 @@ def get_packets_from_pcap_file(pcap_file):
 
 # nacitanie suboru, ktory chceme analyzovat
 # file_name = input("File name without directory and extension: ")
-file_name = 'trace-2'
+file_name = 'trace_ip_nad_20_B'
 
 # ziskanie paketov z suboru pomocou kniznice
 packets = get_packets_from_pcap_file(file_name)
@@ -39,6 +39,8 @@ http_obj, https_obj, telnet_obj, ssh_obj, ftp_c_obj, ftp_d_obj = \
 
 udp_obj = vsetky_ramce.fill_udp_ports(udp_obj)
 tftp_obj = vsetky_ramce.tftp_filter(udp_obj, p_val_by_name)
+
+icmp_obj = vsetky_ramce.fill_icmp_type_and_seq_n(icmp_obj, p_val_by_name)
 
 http_complete, http_incomplete = comm_finder.find_comms(http_obj.copy())
 https_complete, https_incomplete = comm_finder.find_comms(https_obj.copy())

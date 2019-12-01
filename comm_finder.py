@@ -9,6 +9,15 @@ def same_communication(p1, p2):
         return False
 
 
+def same_icmp_communication(p1, p2):
+    ips = [p1.src_ip, p1.dest_ip]
+    seq_n = p1.icmp_seq_n
+    if p2.src_ip in ips and p2.dest_ip in ips and p2.icmp_seq_n == seq_n:
+        return True
+    else:
+        return False
+
+
 def get_flag_byte_from_packet(p):
     return p.packet[94:96].decode('utf-8')
 
@@ -104,3 +113,31 @@ def find_tftp_comms(tftp_datagrams, p_val_by_name):
             return communication
     return None
 
+
+def find_icmp_comms(packets, p_name_by_val, p_val_by_name):
+    communications = []
+    communication = []
+    packet = None
+    get_packet = 1
+    i = 0
+
+    while packets:
+        if get_packet:
+            packet = packets.pop(0)
+            i -= 1
+            get_packet = 0
+            communication.append(packet)
+        else:
+            p = packets[i]
+            if same_icmp_communication(packet, p):
+                communication.append(p)
+                packets.pop(i)
+                i -= 1
+
+        i += 1
+        if i == len(packets):
+            get_packet = 1
+            i = 0
+            communications.append(communication.copy())
+            communication.clear()
+    return communications

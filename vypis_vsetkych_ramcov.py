@@ -273,5 +273,13 @@ def tftp_filter(udp_obj, p_val_by_name):
     return tftps
 
 
-def find_icmp_comms(tftp_obj, p_name_by_val, p_val_by_name):
-    pass
+def fill_icmp_type_and_seq_n(icmp_obj, p_val_by_name):
+    for p in icmp_obj:
+        ihl = int(p.packet[29:30].decode('utf-8'), 16)
+        type_index = 8 * ihl + 28
+        type_bytes = p.packet[type_index:(type_index + 2)]
+        p.icmp_type = int(type_bytes.decode('utf-8'), 16)
+        if p.icmp_type in [p_val_by_name['Echo'], p_val_by_name['EchoReply']]:
+            seq_n_bytes = p.packet[(type_index + 12):(type_index + 16)]
+            p.icmp_seq_n = int(seq_n_bytes.decode('utf-8'), 16)
+    return icmp_obj
