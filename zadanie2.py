@@ -31,6 +31,7 @@ def print_menu():
     print('  7    TFTP')
     print('  8    ICMP')
     print('  9    ARP')
+    print('  10   DNS')
     print('-------------------------------\n')
 
 
@@ -54,6 +55,7 @@ http_obj, https_obj, telnet_obj, ssh_obj, ftp_c_obj, ftp_d_obj = \
 
 udp_obj = vsetky_ramce.fill_udp_ports(udp_obj)
 tftp_obj = vsetky_ramce.tftp_filter(udp_obj, p_val_by_name)
+dns_obj = vsetky_ramce.dns_filter(udp_obj, p_val_by_name)
 
 icmp_obj = vsetky_ramce.fill_icmp_type_and_seq_n(icmp_obj, p_val_by_name)
 
@@ -89,6 +91,9 @@ while True:
         vsetky_ramce.print_icmp_comms(icmp_comms, p_name_by_val)
     elif choice == 9:
         print('ARP communication not implemented')
+    elif choice == 10:
+        vsetky_ramce.print_packets(dns_obj)
+        print(f'Pocet DNS paketov: {len(dns_obj)}')
     else:
         print('Bad input, try again')
 

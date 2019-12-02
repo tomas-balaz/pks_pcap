@@ -273,6 +273,15 @@ def tftp_filter(udp_obj, p_val_by_name):
     return tftps
 
 
+def dns_filter(udp_obj, p_val_by_name):
+    dnss = []
+    for datagram in udp_obj:
+        if datagram.dest_port == p_val_by_name['DNS'] or datagram.src_port == p_val_by_name['DNS']:
+            datagram.l5_prot = "DNS"
+            dnss.append(datagram)
+    return dnss
+
+
 def fill_icmp_type_and_seq_n(icmp_obj, p_val_by_name):
     for p in icmp_obj:
         ihl = int(p.packet[29:30].decode('utf-8'), 16)
